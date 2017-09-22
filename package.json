@@ -12,8 +12,22 @@
     "build": "npm run clean && babel src -d dist",
     "docs:serve": "documentation serve -w src/",
     "docs:build": "documentation build src/Trie.js -f html -o .",
+<<<<<<< e9b9d489d588aa1b9305b5314645794c48190a00
     "clean": "rm -rf dist .nyc_output coverage *.tgz docs",
     "prepack": "npm run build"
+=======
+    "clean": "rm -rf dist .nyc_output coverage *.tgz",
+    "version": "npm run clean:results && npm run docs:build && npm run bench && git add benchmark/results docs",
+    "prepack": "npm run build",
+    "clean:results": "rm -rf benchmark/results",
+    "benchone": "clear && babel-node",
+    "bench": "npm run benchone benchmark",
+    "bench:get": "npm run benchone benchmark/get",
+    "bench:match": "npm run benchone benchmark/match",
+    "bench:set": "npm run benchone benchmark/set",
+    "bench:toArray": "npm run benchone benchmark/toArray",
+    "bench:toObject": "npm run benchone benchmark/toObject"
+>>>>>>> Place docs webiste to root
   },
   "repository": {
     "type": "git",
