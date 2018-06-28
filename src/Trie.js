@@ -1,8 +1,8 @@
 // @flow
-'use strict'
+"use strict";
 
-const Node = require('./Node')
-const getClosestNode = require('./getClosestNode')
+const Node = require("./Node");
+const getClosestNode = require("./getClosestNode");
 
 /**
   Trie class
@@ -10,16 +10,16 @@ const getClosestNode = require('./getClosestNode')
   @example const store = new Trie(new Map())
 */
 class Trie extends Map {
-  rootSocket: Object
+  rootSocket: Object;
 
-  constructor (args?: any) {
-    super(args)
-    const self = this
-    this.rootSocket = {}
+  constructor(args?: any) {
+    super(args);
+    const self = this;
+    this.rootSocket = {};
     if (args) {
       args.forEach((value, key) => {
-        self.set(key, value)
-      })
+        self.set(key, value);
+      });
     }
   }
 
@@ -28,9 +28,9 @@ class Trie extends Map {
 
     @example store.get('Michael')
   */
-  get (query: string): any {
-    const node: Node | void = super.get(query)
-    return node && node.value
+  get(query: string): any {
+    const node: Node | void = super.get(query);
+    return node && node.value;
   }
 
   /**
@@ -39,53 +39,60 @@ class Trie extends Map {
     @example store.match('Michael')
     @example store.match('John', 20)
   */
-  match (query: string, count?: number): Array<any> {
+  match(query: string, count?: number, sort = "ASC"): Array<any> {
     if (!query) {
-      return []
+      return [];
     }
 
-    const points: Array<Node> = []
-    const result: Array<any> = []
-    const closestNode: Node | void = getClosestNode(this.rootSocket, query)
+    const points: Array<Node> = [];
+    const result: Array<any> = [];
+    const closestNode: Node | void = getClosestNode(this.rootSocket, query);
 
     if (!closestNode) {
-      return []
+      return [];
     }
 
-    let node: Node = closestNode
+    let node: Node = closestNode;
 
     while (true) {
       if (count && result.length >= count) {
-        break
+        break;
       }
 
-      const sockets: Array<string> = Object.keys(node.socket)
-      const socketCount: number = sockets.length
-      const char: string = sockets[0]
+      const sockets: Array<string> = Object.keys(node.socket);
+      const socketCount: number = sockets.length;
+      const char: string = sockets[0];
 
       if (node.key) {
-        result.push(node.value)
+        result.push(node.value);
       }
 
       if (socketCount >= 2) {
-        for (let n = 1, len = sockets.length; n < len; n++) {
-          points.push(node.socket[sockets[n]])
+        let len = sockets.length;
+        if (sort === "ASC") {
+          for (let n = len - 1; n > 0; n--) {
+            points.push(node.socket[sockets[n]]);
+          }
+        } else {
+          for (let n = 1; n < len; n++) {
+            points.push(node.socket[sockets[n]]);
+          }
         }
       } else if (socketCount === 0) {
-        const next: Node = points.pop()
+        const next: Node = points.pop();
 
         if (!next) {
-          break
+          break;
         }
 
-        node = next
-        continue
+        node = next;
+        continue;
       }
 
-      node = node.socket[char]
+      node = node.socket[char];
     }
 
-    return result
+    return result;
   }
 
   /**
@@ -97,27 +104,27 @@ class Trie extends Map {
     @example store.set('Anton Webern', [])
     @example store.set('Charles Best', function info () {})
   */
-  set (key: string, value: any): Map {
+  set(key: string, value: any): Map {
     if (!key) {
-      return
+      return;
     }
 
-    let node = new Node({ socket: this.rootSocket })
+    let node = new Node({ socket: this.rootSocket });
 
     for (let n = 0, len = key.length; n < len; n++) {
-      const char: string = key[n]
+      const char: string = key[n];
 
       if (!node.socket[char]) {
-        node.socket[char] = new Node()
+        node.socket[char] = new Node();
       }
 
-      node = node.socket[char]
+      node = node.socket[char];
     }
 
-    node.key = key
-    node.value = value
+    node.key = key;
+    node.value = value;
 
-    return super.set(key, node)
+    return super.set(key, node);
   }
 
   /**
@@ -125,57 +132,57 @@ class Trie extends Map {
 
     @example store.delete('Michael Jacobs')
   */
-  delete (query: string): boolean {
-    const end: Node | void = super.get(query)
+  delete(query: string): boolean {
+    const end: Node | void = super.get(query);
 
     if (!end) {
-      return false
+      return false;
     }
 
-    const endSockets: number = Object.keys(end.socket).length
+    const endSockets: number = Object.keys(end.socket).length;
 
     if (endSockets) {
-      delete end.key
-      delete end.value
-      super.delete(query)
-      return true
+      delete end.key;
+      delete end.value;
+      super.delete(query);
+      return true;
     }
 
-    let node = new Node({ socket: this.rootSocket })
+    let node = new Node({ socket: this.rootSocket });
 
-    let point: Object | void
+    let point: Object | void;
     for (let n = 0, len = query.length; n < len; n++) {
-      const char: string = query[n]
+      const char: string = query[n];
 
       if (!node.socket[char]) {
-        return true
+        return true;
       }
 
       if (node.key || Object.keys(node.socket).length >= 2) {
-        point = { node, char }
+        point = { node, char };
       }
 
-      node = node.socket[char]
+      node = node.socket[char];
     }
 
     if (!point) {
-      this.clear()
-      return true
+      this.clear();
+      return true;
     }
 
-    delete point.node.socket[point.char]
-    super.delete(query)
-    return true
+    delete point.node.socket[point.char];
+    super.delete(query);
+    return true;
   }
 
   /**
     Removes all key/value pairs from the Trie object
     @example store.clear()
   */
-  clear (): void {
-    this.rootSocket = {}
-    super.clear()
+  clear(): void {
+    this.rootSocket = {};
+    super.clear();
   }
 }
 
-module.exports = Trie
+module.exports = Trie;
